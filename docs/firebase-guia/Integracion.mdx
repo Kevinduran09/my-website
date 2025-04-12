@@ -1,0 +1,217 @@
+---
+sidebar_position: 4 
+---
+
+
+# Autenticación
+
+Autenticación con Firebase en aplicaciones Ionic
+
+La autenticación mediante firebase en Ionic es posible debido a que al ser un framework de javascript el metodo de implementación suele ser similar al utilizado en otros frameworks basados en el mismo lenguaje de programación.
+
+## Acceso a Firebase
+
+Es necesaria tener acceso y haber iniciado sesión en la plataforma de firebase para poder utilizarlo. Desde el [**sitio web**](https://console.firebase.google.com/u/0/) oficial se puede realizar este paso, una vez hecho se configura un nuevo proyecto mediante las opciones disponibles en la plataforma. 
+
+### Configuración del proyecto
+
+Mediante la opción de **crear un proyecto de firebase** se asigna un nombre al proyecto, además de especificar si se desean habilitar herramientas como gemini o analytics.
+
+import crearProyecto from './img/crear-proyecto.png';
+
+<img src={crearProyecto} alt="crear proyecto" style={{ display: 'block', margin: '15px auto' }} width='70%' />
+
+
+### Servicios de autenticación
+
+Dentro de la interfaz de Firebase se encuentran los diversos servicios disponibles, se selecciona **Authentication** y continuar.
+
+Habiendo habilitado el servicio se debe especificar el metodo de acceso, Firebase permite implementar diversos tipos de autenticación como **Facebook**, **Twitter**, **Apple** o **Microsoft**, además de la autenticación mediante correo y contraña. 
+
+import metodo from './img/metodo-acceso.png';
+import habilitar from './img/habilitar.png';
+
+<div
+  style={{
+    display:'flex',
+    flexDirection:'column',
+    gap:15,
+    alignItems:'center'
+  }}
+>
+  <img
+    src={metodo}
+    alt="Método de acceso"
+    tyle={{ display: 'block', margin: '15px auto' }} width='70%'
+  />
+  <img
+    src={habilitar}
+    alt="Habilitar acceso"
+    tyle={{ display: 'block', margin: '15px auto' }} width='70%'
+  />
+</div>
+
+
+## Instalación de Firebase
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Habiendo creado un proyecto en Firebase desde el sitio web oficial, ahora se debe instalar en el proyecto de Ionic desde la terminal utilizando el siguente comando: 
+<Tabs>
+  <TabItem value="apple" label="npm" default>
+   ```bash
+   npm install firebase
+   ```
+  </TabItem>
+  <TabItem value="orange" label="yarn">
+    ```bash
+    yarn install firebase
+    ```
+  </TabItem>
+  <TabItem value="banana" label="pnpm">
+    ```bash
+    pnpm install firebase
+    ```
+  </TabItem>
+</Tabs>
+
+>Asegúrate de tener configurado previamente tu proyecto de Firebase desde la consola, y haber registrado tu aplicación web.
+
+## Configuración de Firebase en tu proyecto
+
+Luego de que la instalación de Firebase finalice se debe crear el archivo de configuración el cual contiene las credenciales para configurar el acceso a nuestro servicio de Firebase previamente configurado.
+```js title='src/firebaseConfig.ts'
+
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+```
+
+Estas credenciales se obtiene desde el apartado de configuración del proyecto en Firebase, en el apartado de **tus apps** se selecciona la opción de agregar Firebase a tu app web, para este proceso de debe definir un nombre para la aplicación y seleccioanr la opción de registrar. 
+
+import registrarApp from './img/registrar-app.png';
+
+<img src={registrarApp} alt="registrar app" style={{ display: 'block', margin: '15px auto' }} width='70%' />
+
+## Lógica de autenticación
+
+Una vez realizada la configuración de las credenciales se puede utilizar Firebase para el manejo de autenticación en la aplicación. Se debe crear un archivo en el cual se maneje la lógica de autenticación. 
+
+```js title="src/services/AuthService.ts"
+
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+
+// Registrar nuevo usuario
+export const register = async (email: string, password: string) => {
+  return await createUserWithEmailAndPassword(auth, email, password);
+};
+
+// Iniciar sesión existente
+export const login = async (email: string, password: string) => {
+  return await signInWithEmailAndPassword(auth, email, password);
+};
+```
+
+ ### Registro con correo y contraseña
+La función `createUserWithEmailAndPassword` es una función proporcionada por la librería de firebase para manejar la creación de un nuevo usuario. Los paramentros que recibe es primeramente la instancia de autenticación de firebase la cual se exporta desde el archivo `firebaseConfig.ts` además del correo electrónico y la contraseña del usuario. 
+
+
+### Inicio de sesión con correo y contraseña
+
+La función `signInWithEmailAndPassword` maneja el inicio de sesión de un usuario que ya se encuentrra regitrado dentro la base de datos de Firebase. Como parametros recibe la instancia de autenticación de firebase la cual se exporta desde el archivo `firebaseConfig.ts` además del correo electrónico y la contraseña del usuario. 
+
+
+Ejemplo de respuesta de Firebase al crear un usuario o iniciar sesión: 
+```yaml
+{
+  user: {
+    uid: string,
+    email: string | null,
+    emailVerified: boolean,
+    displayName: string | null,
+    photoURL: string | null,
+    phoneNumber: string | null,
+    providerId: string,
+    // ...otros campos del objeto User
+  },
+  providerId: string | null,
+  operationType: "signIn" | "link" | "reauthenticate"
+}
+```
+
+## Implementación funcional
+
+Para implementarlo de manera funcional se debe desarrollar un formulario que permita la captura de los datos por medio del FrontEnd de la aplicación y conectarlo con los servicios definidos en [**`AuthService.ts`**](#lógica-de-autenticación)
+
+El siguiente es un ejemplo de formulario sencillo que permite iniciar sesión y registrar un nuevo usuario por medio de Firebase haciendo uso de las funciones definidas anteriomente. 
+
+```jsx
+// src/pages/Login.tsx
+
+import React, { useState } from 'react';
+import { IonContent, IonPage, IonInput, IonButton, IonText } from '@ionic/react';
+import { login, register } from '../services/AuthService';
+
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      alert('¡Inicio de sesión exitoso!');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      await register(email, password);
+      alert('¡Usuario registrado con éxito!');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <IonPage>
+      <IonContent className="ion-padding">
+        <h2>Iniciar sesión / Registrarse</h2>
+        <IonInput           
+          placeholder="Correo electrónico"
+          type="email"
+          value={email}
+          onIonChange={(e) => setEmail(e.detail.value!)}
+        />
+        <IonInput
+          placeholder="Contraseña"
+          type="password"
+          value={password}
+          onIonChange={(e) => setPassword(e.detail.value!)}
+        />
+        {error && <IonText color="danger">{error}</IonText>}
+        <IonButton expand="block" onClick={handleLogin}>Iniciar Sesión</IonButton>
+        <IonButton expand="block" fill="outline" onClick={handleRegister}>Registrarse</IonButton>
+      </IonContent>
+    </IonPage>
+  );
+};
+
+export default Login;
+```

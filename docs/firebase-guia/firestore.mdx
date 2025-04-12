@@ -1,0 +1,185 @@
+---
+sidebar_location: 5
+---
+
+# Firestore + ionic
+
+Firestore es una base de datos NoSQL de Firebase para el almacenamiento de datos
+
+## Firestore
+
+Cloud Firestore como se mencionaba anteriormente es la base de datos no relacional de Firebase, permite almacenar datos por medio de colecciones de una manera similar a **mongoDB**.
+
+## Instalación
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+En tu proyecto de Ionic + React, ejecuta el siguiente comando para instalar firebase:
+
+<Tabs>
+  <TabItem value="apple" label="npm" default>
+   ```bash
+   npm install firebase
+   ```
+  </TabItem>
+  <TabItem value="orange" label="yarn">
+    ```bash
+    yarn install firebase
+    ```
+  </TabItem>
+  <TabItem value="banana" label="pnpm">
+    ```bash
+    pnpm install firebase
+    ```
+  </TabItem>
+</Tabs>
+
+>Luego de instalar se debe configurar el archivo `firebaseConfig.ts`. Consulta [**Authentication**](./Integracion.mdx) para ver el proceso de configuración.
+
+```ts title="src/firebaseConfig.ts"
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_BUCKET",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+
+// Exporta Firestore
+export const db = getFirestore(app);
+```
+
+Dentro de `firebaseConfig.ts` se importa la función `getFirestore` la cual se encarga de generar la isntancia para la conexión con la base de datos de firebase.
+## Crear base de datos en firebase
+
+Desde [**firebase**](https://console.firebase.google.com/u/0/) se debe seleccionar Cloud Firestore para crear el servicio de base de datos dentro de nuestro proyecto de firebase. 
+
+Dentro de **Firebase Database** podemos visualizar los datos almacenados en nuestra base de datos así como definir modelos de datos. Estos modelos pueden ser definos clickeando en *inicar colección*, luego se debe establecer el nombre de la colección así como los campos que va tener. 
+
+import firebaseDB from './img/firebase-database.png';
+import createColection from './img/create-colection.png';
+
+
+<p style={{ textAlign: 'center', fontWeight: 'bold' }}>
+  Interfaz de la base de datos de Firebase
+</p>
+<img src={firebaseDB} alt="firebase database" style={{ display: 'block', margin: '15px auto' }} width='70%' />
+
+
+
+<p style={{ textAlign: 'center', fontWeight: 'bold' }}>
+  Definición de una colección
+</p>
+<img src={createColection} alt="create colection database" style={{ display: 'block', margin: '15px auto' }} width='70%' />
+
+## Insertar datos desde Ionic
+
+Luego de crear una colección y definir su modelo de datos, para insertar datos en la base de datos desde ionic se debe configurar la función encargada de manejar la captura de los datos y la conexión con la base de datos de firebase. 
+
+```js title="src/services/firestoreService.ts"
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
+export const agregarUsuario = async (nombre: string, email: string) => {
+  try {
+    const docRef = await addDoc(collection(db, 'user'), {
+      name,
+      email,
+      number
+    });
+    console.log("Documento creado con ID:", docRef.id);
+    return docRef;
+  } catch (e) {
+    console.error("Error al agregar documento:", e);
+  }
+};
+```
+### **1. collection**
+Esta función devuelve la referencia de la colección especificada. En este caso, retorna la referencia de la colección **user**, permitiendo interactuar con los documentos almacenados en ella.
+
+### **2. addDoc**
+Esta función se encarga de añadir un nuevo documento a la colección especificada. Recibe como parámetros los datos que se desean almacenar y los guarda en la base de datos de Firestore. En este caso, se está añadiendo un documento con los campos `name`, `email` y `number`.
+
+### Ejemplo de uso:
+```js
+import { agregarUsuario } from './services/firestoreService';
+
+const guardarUsuario = async () => {
+  const nombre = "Juan Pérez";
+  const email = "juan.perez@example.com";
+  const number = "123456789"; // Asegúrate de incluir este campo en la función
+
+  try {
+    const nuevoUsuario = await agregarUsuario(nombre, email);
+    console.log("Usuario agregado:", nuevoUsuario.id);
+  } catch (error) {
+    console.error("Error al guardar el usuario:", error);
+  }
+};
+
+guardarUsuario();
+```
+## Leer datos desde Ionic
+
+Luego de crear una colección y almacenar datos en Firestore, es posible leer los documentos almacenados utilizando la función `getDocs` de Firebase. A continuación, se muestra cómo configurar una función para obtener los datos de la colección **usuarios**.
+
+```js title="src/services/firestoreService.ts"
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+
+export const obtenerUsuarios = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'usuarios'));
+    const listaUsuarios: any[] = [];
+    querySnapshot.forEach((doc) => {
+      listaUsuarios.push({ id: doc.id, ...doc.data() });
+    });
+    return listaUsuarios;
+  } catch (e) {
+    console.error("Error al obtener usuarios:", e);
+  }
+};
+```
+
+
+### **3. querySnapshot**
+El objeto `querySnapshot` permite iterar sobre los documentos recuperados utilizando el método `forEach`. Cada documento contiene un identificador único (`id`) y los datos asociados.
+
+### Ejemplo de uso:
+
+```ts
+import { obtenerUsuarios } from './services/firestoreService';
+
+const cargarUsuarios = async () => {
+  const usuarios = await obtenerUsuarios();
+  console.log("Usuarios obtenidos:", usuarios);
+};
+
+cargarUsuarios();
+```
+
+## Reglas de seguridad
+
+Las reglas de seguridad en Firestore son esenciales parac **proteger los datos almacenados** en la base de datos y garantizar que solo los usuarios autorizados puedan acceder o modificar la información. Estas reglas permiten definir permisos basados en condiciones específicas, como la autenticación del usuario o los datos almacenados en los documentos.
+
+Por ejemplo, puedes configurar reglas para permitir que solo usuarios autenticados puedan leer o escribir en la base de datos:
+
+```ts 
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+`allow read, write` Son los permisos definidos mientras que `request.auth != null` establece que solamente si existe auth en la request de la solicitud se otorgue el acceso a los datos.

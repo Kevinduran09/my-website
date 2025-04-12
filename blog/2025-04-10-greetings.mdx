@@ -1,0 +1,99 @@
+---
+slug: MI primer post
+title: My post!
+authors:
+  - name: Kevin Durán
+    title: Software Engineer
+    url: https://github.com/Kevinduran09
+    image_url: https://github.com/Kevinduran09.png
+tags: [greetings]
+
+---
+
+# Mi primer post con docuSaurus
+
+
+<span style={{color:"red"}}>holamundo desde un span html</span>
+
+{/* truncate */}
+## Contendio puro de html con mdx
+<table>
+  <thead>
+      <th>
+        id
+      </th>
+      <th>
+        name
+      </th>
+</thead>
+<tbody>
+  <tr>
+    <td>
+      1
+    </td>
+    <td>
+      Mario
+    </td>
+  </tr>
+</tbody>
+</table>
+
+
+Let's see how to [Welconme](./2021-08-26-welcome/index.md).
+
+Imagen pegada desde los archivos
+```js
+![Docusaurus logo](/img/undraw_docusaurus_mountain.svg)
+```
+![Docusaurus logo](/img/undraw_docusaurus_mountain.svg)
+Imagen pegada desde una url
+
+![img to my github](https://github.com/Kevinduran09.png)
+:::tip[consejo]
+Podemnos crear bloques de codigo y especificar el tipo de lenguaje que es
+:::
+```jsx title="src/components/HelloDocusaurus.js"
+function HelloDocusaurus() {
+  return <h1>Hello, Docusaurus!</h1>;
+}
+```
+```python 
+def greeting(name):
+  print(f'hello {name}')
+
+greeting('marco') # salida: hello marco
+```
+
+:::warning[precaucion]
+Siempre debe definirse bien la ruta
+:::
+
+## Puedo definir contendio react directamente en md con MDX
+
+```jsx title="site/src/components/Input.jsx"
+import { useState } from "react";
+
+import React from 'react'
+
+export default function Input() {
+    const [input, setinput] = useState('')
+    function handleInput(e) {
+        setinput(e.target.value)
+    }
+    return (
+        <div >
+            <span>Digite el texto de un usuario de github</span>
+            <br/>
+            <input type="text" placeholder="Uuario de github" value={input} onChange={handleInput} />
+            <br/>
+            <span>Enlace hacia el perfil de   <a href={`https://github.com/${input}`} target='_blank' style={{ marginLeft: '5px' }}>{input}</a></span>
+          
+        </div>
+    )
+}
+
+```
+import Input from '@site/src/components/Input.jsx'
+
+<Input/>
+

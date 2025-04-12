@@ -1,0 +1,27 @@
+.tableContainer {
+    overflow-x: auto;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.pluginTable {
+    display: inline;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.pluginTable th,
+.pluginTable td {
+    padding: 0.75rem;
+    border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.pluginTable th {
+    background-color: var(--ifm-color-emphasis-100);
+    text-align: left;
+}
+
+.pluginTable tr:nth-child(even) {
+    background-color: var(--ifm-color-emphasis-50);
+}

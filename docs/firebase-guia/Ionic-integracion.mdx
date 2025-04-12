@@ -1,0 +1,115 @@
+---
+sidebar_position: 3
+---
+
+
+# Integración con Ionic
+
+**Ionic** y **Firebase** para el desarrollo de **aplicación móviles poderosas**.
+
+---
+![ionic_banner](./img/ionic-banner.jpg)
+## Qué es Ionic
+
+Ionic es un framework de **Javascript** orientado al desarrollo de poderosas aplicaciones móviles de manera hibrida utilizando tecnologías web como **HTML**, **CSS** Y **JAVASCRIPT**. Permite desarrollar en paralelo una aplicación compatible con Android, iOS y navegadores Web. 
+
+En su [**sitio oficial**](https://ionicframework.com/) se puede encontrar más información acerda del proceso de instalación y configuración. Ionic también es altamente compatible con otros frameworks de desarrollo web de Javascript como **React**, **Angular** o **Vue**, esta caracteristica lo convierte en una grandiosa opción para desarrollar aplicaciones moviles aplicando conceptos y conocimientos del desarrollo Web utilizando un stack moderno.
+
+<div style={{ display: "flex", justifyContent: "center", margin: "1rem 0" }}>
+  <img src="https://indexdesarrollo.com/wp-content/uploads/2019/10/mejores-plataformas-hibridas-apps-moviles.jpg" width="500" alt="Plataformas híbridas" />
+</div>
+
+
+## Capacitor
+
+Capacitor se encuentra desarrollada por el mismo equipo de Ionic. Esta herramienta permite que las aplicaciones web puedan acceder a funcionalidades nativas del dispositivo móvil, tales como la cámara, GPS, almacenamiento, notificaciones push entre otras. Actua como **un puente entre el código web y las API's nativas de Android e iOS**. 
+
+En el [**sitio web**](https://capacitorjs.com/) oficial se puede encontrar mayor documentación acerca del proceso de instalación, configuración así como también la lista de plugins que posee los cuales permiten integrar las diversas funcionalidades nativas. 
+
+## Plugins 
+
+Capacitor cuenta con un amplio número de plugins, los cuales, se utilizan para cubrir las diversas funcionalidades nativas de los dispositovs móvil en las aplicaciones desarrolladas con Ionic. También existen plugins no oficiales los cuales son desarrollados por la comunidad de Ionic, estos permiten implementar funcionalidades nativas que Capacitor no posee pero también proporcionan caracteristica y funciones que se pueden utilizar para mejorar la experiencia de usuario. 
+
+import { PluginTable } from '@site/src/components/PluginTable/PluginTable.jsx'
+
+{/* Tabla con los plugins oficiales */}
+### Plugins Oficiales de Capacitor
+
+
+<PluginTable
+  plugins={[
+    {
+      name: 'Camera',
+      description: 'Captura fotos y videos utilizando la cámara del dispositivo.',
+      link: 'https://capacitorjs.com/docs/apis/camera',
+    },
+    {
+      name: 'Geolocation',
+      description: 'Accede a la ubicación geográfica del dispositivo mediante GPS.',
+      link: 'https://capacitorjs.com/docs/apis/geolocation',
+    },
+    {
+      name: 'Filesystem',
+      description: 'Lee y escribe archivos en el sistema de archivos del dispositivo.',
+      link: 'https://capacitorjs.com/docs/apis/filesystem',
+    },
+    {
+      name: 'Push Notifications',
+      description: 'Envía y recibe notificaciones push en la aplicación.',
+      link: 'https://capacitorjs.com/docs/apis/push-notifications',
+    },
+    {
+      name: 'Network',
+      description: 'Proporciona información sobre el estado de la red y los cambios de conectividad.',
+      link: 'https://capacitorjs.com/docs/apis/network',
+    },
+  ]}
+/>
+
+{/* Tabla con los plugins no oficiales */}
+### Plugins de la Comunidad para Capacitor
+
+
+<PluginTable
+  plugins={[
+    {
+      name: '@capawesome/capacitor-android-battery-optimization',
+      description: 'Gestiona la optimización de batería en dispositivos Android.',
+      link: 'https://github.com/capawesome-team/capacitor-plugins/tree/main/packages/android-battery-optimization',
+    },
+    {
+      name: '@capawesome/capacitor-nfc',
+      description: 'Permite la lectura y escritura de etiquetas NFC.',
+      link: 'https://github.com/capawesome-team/capacitor-plugins/tree/main/packages/nfc',
+    },
+    {
+      name: '@capawesome/capacitor-photo-editor',
+      description: 'Proporciona herramientas para editar fotos dentro de la aplicación.',
+      link: 'https://github.com/capawesome-team/capacitor-plugins/tree/main/packages/photo-editor',
+    },
+    {
+      name: '@capawesome/capacitor-speech-recognition',
+      description: 'Convierte voz en texto utilizando el reconocimiento de voz del dispositivo.',
+      link: 'https://github.com/capawesome-team/capacitor-plugins/tree/main/packages/speech-recognition',
+    },
+    {
+      name: '@capawesome/capacitor-zip',
+      description: 'Permite comprimir y descomprimir archivos ZIP.',
+      link: 'https://github.com/capawesome-team/capacitor-plugins/tree/main/packages/zip',
+    },
+  ]}
+/>
+
+## Capacitor y Firebase
+
+Capacitor es esencial para la implementación de **firebase** dentro de aplicaciones moviles desarrolladas con Ionic, dado que provee acceso a funcionalidades nativas que son utilizadas por firebase como el almacenamiento y las notificaciones push. 
+
+Gracias a su arquitectura basada en plugins, Capacitor simplifica la incorporación de los diversos servicios que ofrece Firebase. [**Capawesome**](https://github.com/capawesome-team/capacitor-firebase) es una colección de plugins que ofrecen soporte para una Integración profunda de firebase. 
+
+### - [Authentication](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/authentication)
+
+### - [Cloud Firestore](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/firestore)
+
+### - [Cloud Functions](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/functions)
+
+### - [Cloud Messagin](https://github.com/capawesome-team/capacitor-firebase/blob/main/packages/messaging)
