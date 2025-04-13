@@ -1,0 +1,99 @@
+
+# Notificaciones Push
+
+Envío y recepción de notificaciones Push con Firebase Cloud Messaging (FCM) en aplicaciones híbridas desarrolladas con **Ionic + React + Capacitor**.
+
+---
+
+## ¿Qué es Firebase Cloud Messaging?
+
+**Firebase Cloud Messaging (FCM)** es un servicio de Firebase que permite enviar notificaciones push y mensajes de datos a dispositivos móviles y aplicaciones web de forma gratuita y escalable.
+
+Es especialmente útil para:
+
+- Informar al usuario sobre eventos importantes.
+- Enviar alertas, promociones o recordatorios.
+- Sincronizar datos de fondo.
+
+
+
+## Requisitos previos
+
+Para poder integrar el servicio de notificaciones push dentro de una aplicación Ionic con Firebase se debe contar con lo siguiente: 
+
+✅ Un proyecto de **Ionic + React** configurado  
+✅ Un proyecto de **Firebase** creado  
+✅ Firebase agregado al proyecto con `firebase` y `@capacitor/firebase-messaging`  
+✅ Una app nativa registrada (Android/iOS) en Firebase  
+
+
+## Instalación de dependencias
+
+```bash
+npm install firebase
+npm install @capacitor/firebase-messaging
+npx cap sync
+```
+
+
+## Configuración 
+
+Una vez instalado firebase y el plugin de capacitor se debe configurar el permiso para las notificaciones en la app.
+
+```js title="App.tsx"
+import { useEffect } from 'react';
+import { FirebaseMessaging } from '@capacitor-firebase/messaging';
+
+const App: React.FC = () => {
+  useEffect(() => {
+    const initPush = async () => {
+      // Solicitar permisos
+      const permission = await FirebaseMessaging.requestPermissions();
+      if (permission.receive === 'granted') {
+        // Obtener el token FCM
+        const token = await FirebaseMessaging.getToken();
+        console.log('Token FCM:', token.token);
+        // Puedes enviar este token a tu servidor para enviar notificaciones específicas
+      }
+
+      // Escuchar notificaciones recibidas
+      FirebaseMessaging.addListener('notificationReceived', (notification) => {
+        console.log('Notificación recibida:', notification);
+      });
+
+      // Escuchar acciones de notificaciones
+      FirebaseMessaging.addListener('notificationActionPerformed', (action) => {
+        console.log('Acción de notificación:', action);
+      });
+    };
+
+    initPush();
+  }, []);
+
+  return (
+    // Tu código JSX aquí
+  );
+};
+
+export default App;
+```
+
+## Prueba de Notificaciones Push
+
+Para poder probar las notificaciones push una vez configuradas y habilitado el permiso en la aplicación se debe enviar la notificación desde la consola de Firebase.
+
+### Compilación de la aplicación
+
+Se debe compilar la aplicación para poder probarla desde un dispositivo físico o un simulador. 
+
+```yaml
+ionic build
+npx cap copy
+npx cap open android
+```
+> Se debe tener previamente instalado [Android Studio](https://developer.android.com/studio?hl=es-419) o [Xcode](https://developer.apple.com/xcode/) dependiendo el entorno en el cual se desee probar.
+
+### Envio de notificaciones
+
+Las notificaciones se envian desde la consola de Firebase, en **Cloud Messaging** se debe seleccionar la opción de **Enviar tu primer mensaje** y completar la información requerida.
+
