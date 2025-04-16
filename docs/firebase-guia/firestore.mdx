@@ -1,5 +1,6 @@
 ---
-sidebar_location: 5
+sidebar_location: 6
+sidebar_label: Manejo de Firestore
 ---
 
 # Firestore + ionic
@@ -183,3 +184,100 @@ service cloud.firestore {
 ```
 
 `allow read, write` Son los permisos definidos mientras que `request.auth != null` establece que solamente si existe auth en la request de la solicitud se otorgue el acceso a los datos.
+
+
+
+## Implementación en el login
+Una vez creada y configurada tu base de datos, puedes combinarla con el sistema de autenticación para almacenar los datos del usuario en Firestore al registrarse, y también mostrar la lista de usuarios registrados dentro de tu app.
+
+Agrega estas funciones a tu componente de Login:
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import { IonContent, IonPage, IonInput, IonButton, IonText, IonList, IonItem, IonLabel } from '@ionic/react';
+import { login, register } from '../services/AuthService';
+import { agregarUsuario, obtenerUsuarios } from '../services/firestoreService';
+
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+
+  const handleLogin = async () => {
+    try {
+      await login(email, password);
+      alert('¡Inicio de sesión exitoso!');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      await register(email, password);
+      const nombre = email.split('@')[0]; // O puedes pedir el nombre por separado
+      await agregarUsuario(nombre, email, '123456789'); // Agrega también un número de ejemplo
+      alert('¡Usuario registrado con éxito!');
+      cargarUsuarios(); // Actualiza la lista
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const cargarUsuarios = async () => {
+    try {
+      const lista = await obtenerUsuarios();
+      setUsuarios(lista);
+    } catch (e) {
+      console.error('Error al cargar usuarios', e);
+    }
+  };
+
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  return (
+    <IonPage>
+      <IonContent className="ion-padding">
+        <h2>Iniciar sesión / Registrarse</h2>
+        <IonInput
+          placeholder="Correo electrónico"
+          type="email"
+          value={email}
+          onIonChange={(e) => setEmail(e.detail.value!)}
+        />
+        <IonInput
+          placeholder="Contraseña"
+          type="password"
+          value={password}
+          onIonChange={(e) => setPassword(e.detail.value!)}
+        />
+        {error && <IonText color="danger">{error}</IonText>}
+        <IonButton expand="block" onClick={handleLogin}>Iniciar Sesión</IonButton>
+        <IonButton expand="block" fill="outline" onClick={handleRegister}>Registrarse</IonButton>
+
+        <h3 style={{ marginTop: '2rem' }}>Usuarios registrados</h3>
+        <IonList>
+          {usuarios.map((usuario) => (
+            <IonItem key={usuario.id}>
+              <IonLabel>
+                <p><strong>Nombre:</strong> {usuario.name}</p>
+                <p><strong>Email:</strong> {usuario.email}</p>
+              </IonLabel>
+            </IonItem>
+          ))}
+        </IonList>
+      </IonContent>
+    </IonPage>
+  );
+};
+
+export default Login;
+```
+
+:::important[Importante]
+Para que funcione se deben modificar las reclas de la base de datos de firebase para que admita la lectura de datos, a como se ve en [**reglas de seguridad**](#reglas-de-seguridad)
+:::
+

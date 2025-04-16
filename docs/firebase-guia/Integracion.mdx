@@ -80,12 +80,18 @@ Habiendo creado un proyecto en Firebase desde el sitio web oficial, ahora se deb
 
 ## Configuración de Firebase en tu proyecto
 
-Luego de que la instalación de Firebase finalice se debe crear el archivo de configuración el cual contiene las credenciales para configurar el acceso a nuestro servicio de Firebase previamente configurado.
-```js title='src/firebaseConfig.ts'
+Se debe crear el archivo de configuración el cual contiene las credenciales necersarias para establecer la conexión entre la aplicación de Ionic y Firebase.
 
+
+
+```js title='src/firebaseConfig.ts'
+// Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_AUTH_DOMAIN",
@@ -94,21 +100,27 @@ const firebaseConfig = {
   messagingSenderId: "TU_SENDER_ID",
   appId: "TU_APP_ID"
 };
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 ```
 
-Estas credenciales se obtiene desde el apartado de configuración del proyecto en Firebase, en el apartado de **tus apps** se selecciona la opción de agregar Firebase a tu app web, para este proceso de debe definir un nombre para la aplicación y seleccioanr la opción de registrar. 
+
+Para obtener las credenciales de acceso en el menu principal de firebase se debe configurar una nueva app. E el apartado de **tus apps** o desde el menu principal hay varias opciones de configuración, se seleciona la opción de configuración para web. 
 
 import registrarApp from './img/registrar-app.png';
+import menuPrinciapl from './img/menu_principal.png'
+
+<img src={menuPrinciapl} alt="menu principal" style={{ display: 'block', margin: '15px auto' }} width='70%' />
 
 <img src={registrarApp} alt="registrar app" style={{ display: 'block', margin: '15px auto' }} width='70%' />
 
 ## Lógica de autenticación
 
 Una vez realizada la configuración de las credenciales se puede utilizar Firebase para el manejo de autenticación en la aplicación. Se debe crear un archivo en el cual se maneje la lógica de autenticación. 
+
+Con las credenciales agregadas dentro de la aplicación Firebase está listo para ser utiizado dentro de la aplicación en el sistema de autenticación. Se debe crear un archivo que defina la lógica de autenticación necesaria en la aplicación. 
 
 ```js title="src/services/AuthService.ts"
 
@@ -125,7 +137,7 @@ export const login = async (email: string, password: string) => {
   return await signInWithEmailAndPassword(auth, email, password);
 };
 ```
-
+> Se debe haber definido el tipo de autenticación desde Firebase Console, [**ver aparato anterior.**](#servicios-de-autenticación)
  ### Registro con correo y contraseña
 La función `createUserWithEmailAndPassword` es una función proporcionada por la librería de firebase para manejar la creación de un nuevo usuario. Los paramentros que recibe es primeramente la instancia de autenticación de firebase la cual se exporta desde el archivo `firebaseConfig.ts` además del correo electrónico y la contraseña del usuario. 
 
@@ -215,3 +227,5 @@ const Login: React.FC = () => {
 
 export default Login;
 ```
+
+Para que el de inicio de sesión funcione correctamente debe haber activado y definido un provedor de autenticación en Firebase Console, en este caso el metodo de correo electrónico y contraseña. 

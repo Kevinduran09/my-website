@@ -1,0 +1,236 @@
+---
+sidebar_location: 5
+sidebar_label: Autenticación con Google
+---
+
+# Autenticación con Google en Ionic + React
+
+La integración de la autenticación con Google en una aplicación Ionic + React se realiza utilizando Firebase Authentication, lo que permite a los usuarios iniciar sesión con sus cuentas de Google de manera rápida y segura. A continuación, te guiaré paso a paso para configurar esta funcionalidad.
+
+## Instalación de dependencias
+
+Si aún no has instalado Firebase en tu proyecto, comienza con la instalación de la librería. Si ya la tienes instalada, puedes saltar este paso.
+
+```bash
+npm install firebase  @capacitor-firebase/authentication
+```
+
+También asegúrate de tener Capacitor instalado en tu proyecto. Si aún no lo has hecho, puedes agregarlo con estos comandos:
+
+```bash
+npm install @capacitor/core @capacitor/cli
+npx cap init
+```
+
+##  Configurar Firebase en el Proyecto
+
+Desde Firebase Console se debe habilitar un nuevo provedor de autenticación, en este caso el provedor de Google.  Se debe asociar un correo electrónico  de Google valido en el aparatado de **Correo electrónico de asistencia del proyecto**. 
+
+import googleMethod from './img/google_method.png'
+
+
+<img src={googleMethod} alt="Configuracion metodo de google" style={{ display: 'block', margin: '15px auto' }} width='70%' />
+
+
+##  Implementar la Autenticación con Google
+
+Para implementar la autenticación con Google en tu aplicación de Ionic importa la librería de autenticación de Firebase y crea las funciones necesarias para gestionar el inicio de sesión con Google:
+
+
+```tsx title='components/GoogleLoginButton.tsx'
+import React from 'react';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { IonButton, IonToast } from '@ionic/react';
+import { GoogleAuthProvider, signInWithCredential, getAuth } from 'firebase/auth';
+
+interface GoogleLoginButtonProps {
+  onLoginSuccess?: (user: any) => void;
+  onLoginError?: (error: any) => void;
+}
+
+const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
+  onLoginSuccess,
+  onLoginError
+}) => {
+  const [showError, setShowError] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
+
+  const handleGoogleLogin = async () => {
+    try {
+      // Paso 1: Login nativo con Google (Capacitor)
+      const result = await FirebaseAuthentication.signInWithGoogle();
+
+      // Paso 2: Validar si hay token e ID
+      const idToken = result?.credential?.idToken;
+      if (!idToken) throw new Error('No se obtuvo el idToken de Google');
+
+      // Paso 3: Obtener credential y loguear en Firebase Web
+      const credential = GoogleAuthProvider.credential(idToken);
+      const auth = getAuth(); // Firebase Web Auth instance
+      const userCredential = await signInWithCredential(auth, credential);
+      const user = userCredential.user;
+
+      // Paso 4: Retornar al componente padre
+      if (onLoginSuccess) onLoginSuccess(user);
+    } catch (error: any) {
+      setErrorMessage('Error al iniciar sesión con Google');
+      setShowError(true);
+      if (onLoginError) onLoginError(error);
+      console.error('Google Sign-in Error:', error);
+    }
+  };
+
+  return (
+    <>
+      <IonButton expand="block" onClick={handleGoogleLogin}>
+        Iniciar sesión con Google
+      </IonButton>
+      <IonToast
+        isOpen={showError}
+        message={errorMessage}
+        duration={2500}
+        color="danger"
+        onDidDismiss={() => setShowError(false)}
+      />
+    </>
+  );
+};
+
+export default GoogleLoginButton;
+
+```
+
+Este codigo permite implementar el inicio de sesión por medio de google tanto en disponibles moviles como en Web. 
+
+
+## Código explicado
+
+```tsx
+// Paso 1: Login nativo con Google (Capacitor)
+const result = await FirebaseAuthentication.signInWithGoogle();
+```
+Este netodo es el encarga de abrir la ventana nativa para el inicio de sesión por medio de google, retorna un objeto `AuthenticationResult`, este contiene la información del usuario así como un token necesario para autenticar al usuario en Firebase Web.
+
+```tsx
+// Paso 3: Obtener credential y loguear en Firebase Web
+const credential = GoogleAuthProvider.credential(idToken);
+```
+sta función construye una credencial de autenticación de Firebase a partir del idToken de Google. Actua como el puente entre Google y Firebase Auth en la Web.
+
+```tsx
+const auth = getAuth(); // Firebase Web Auth instance
+const userCredential = await signInWithCredential(auth, credential);
+```
+Se obtiene la instancia de autenticación de Firebase la cual se utiliza para poder establecer el inicio de sesión. la función ``signInWithCredential(auth, credential)`` realiza el login con Firebase recibiendo por paraemtros la isntancia de autenticación así como las credenciales del usuario. 
+
+
+### Implementación en el login:
+```tsx title="src/compoentes/Login.tsx"
+
+
+import React, { useEffect, useState } from 'react';
+import { IonContent, IonPage, IonInput, IonButton, IonText, IonList, IonItem, IonLabel, IonAvatar, IonTitle } from '@ionic/react';
+import { login, register } from '../../services/firebase/AuthService';
+import { agregarUsuario, obtenerUsuarios } from '../../services/firebase/firestoreService';
+import GoogleLoginButton from '../GoogleLoginButton';
+
+const Login: React.FC = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [usuarios, setUsuarios] = useState<any[]>([]);
+    const [user, setUser] = useState<any>(null);
+
+    const handleLogin = async () => {
+        try {
+            const userCredential =  await login(email, password);
+            const user = userCredential.user;
+            console.log(user); // ✅ Este sí est
+            alert('¡Inicio de sesión exitoso!');
+            setError('')
+            cargarUsuarios();
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            const userCredential = await register(email, password); const user = userCredential.user;
+            console.log(user); // ✅ Este sí está
+            const nombre = email.split('@')[0]; // O puedes pedir el nombre por separado
+            await agregarUsuario(nombre, email, '123456789'); // Agrega también un número de ejemplo
+            alert('¡Usuario registrado con éxito!');
+            setError('')
+            cargarUsuarios()
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+    const cargarUsuarios = async () => {
+        try {
+            const usuarios = await obtenerUsuarios(); // ← tu función
+            console.log(usuarios);
+            setUsuarios(usuarios || []);
+         
+        } catch (e) {
+            console.error('Error al cargar usuarios', e);
+        }
+    };
+    useEffect(() => {
+        cargarUsuarios();
+    }, []);
+    return (
+        <IonPage>
+            <IonContent className="ion-padding" >
+             
+                    <h2>Iniciar sesión / Registrarse</h2>
+                    <IonInput
+                        placeholder="Correo electrónico"
+                        type="email"
+                        value={email}
+                        onIonChange={(e) => setEmail(e.detail.value!)}
+                    />
+                    <IonInput
+                        placeholder="Contraseña"
+                        type="password"
+                        value={password}
+                        onIonChange={(e) => setPassword(e.detail.value!)}
+                    />
+                    {error && <IonText color="danger">{error}</IonText>}
+                    <IonButton expand="block" onClick={handleLogin}>Iniciar Sesión</IonButton>
+                    <IonButton expand="block" fill="outline" onClick={handleRegister}>Registrarse</IonButton>
+                    <GoogleLoginButton onLoginSuccess={(user) => setUser(user)} />
+                    {user && (
+                        <div style={{display:'flex',flexDirection:'row',gap:10,justifyContent:'center',alignItems:'center',padding:15}}>
+                            <div style={{textAlign:'center'}}>
+                            <IonTitle>Usuario Logueado</IonTitle>
+                            <IonText>{`Bienvenido, ${user.displayName}`}</IonText>
+                            </div>
+                            <div>
+                            <IonAvatar>
+                                <img alt="Silhouette of a person's head" src={user.photoURL} />
+                            </IonAvatar>
+                            </div>
+                        </div>
+                    )}
+                    <h3 style={{ marginTop: '2rem' }}>Usuarios registrados</h3>
+                    <IonList>
+                        {usuarios.map((usuario) => (
+                            <IonItem key={usuario.id}>
+                                <IonLabel>
+                                    <p><strong>Nombre:</strong> {usuario.username}</p>
+                                    <p><strong>Email:</strong> {usuario.email}</p>
+                              
+                                </IonLabel>
+                            </IonItem>
+                        ))}
+                    </IonList>
+            
+            </IonContent>
+        </IonPage>
+    );
+};
+
+export default Login;
+```
